@@ -62,35 +62,91 @@ function lp_process_settings() {
         update_option( 'blog_public', 0 );
     }
 
+
+
+    // delete default content
+    $hello_post = get_page_by_title( 'Hello world!', OBJECT, 'post' );
+
+    if ( $hello_post ) {
+        wp_delete_post( $hello_post->ID, true );
+    }
+
+    $sample_page = get_page_by_title( 'Sample Page', OBJECT, 'page' );
+
+    if ( $sample_page ) {
+        wp_delete_post( $sample_page->ID, true );
+    }
+
+    // delete hello dolly
+    if ( file_exists( WP_PLUGIN_DIR . '/hello.php' ) ) {
+
+        deactivate_plugins( 'hello.php' );
+
+        delete_plugins([
+            'hello.php'
+        ]);
+    }
+
     // discussion settings
     $comments_enabled = isset( $_POST['lp_comments'] );
 
     if ( ! $comments_enabled ) {
 
+        update_option( 'default_ping_status', 'closed' );
+        update_option( 'default_pingback_flag', 0 );
+
         update_option( 'default_comment_status', 'closed' );
+
+        update_option( 'require_name_email', 0 );
         update_option( 'comment_registration', 0 );
+
+        update_option( 'close_comments_for_old_posts', 1 );
+        update_option( 'close_comments_days_old', 14 );
+
+        update_option( 'show_comments_cookies_opt_in', 0 );
+
         update_option( 'thread_comments', 0 );
+        update_option( 'thread_comments_depth', 3 );
+
+        update_option( 'page_comments', 0 );
+
+        update_option( 'comments_notify', 0 );
+        update_option( 'moderation_notify', 0 );
+
+        update_option( 'comment_moderation', 1 );
+        update_option( 'comment_whitelist', 0 );
+
         update_option( 'show_avatars', 0 );
 
     } else {
 
-        update_option( 'default_comment_status', 'open' );
-
         update_option( 'default_ping_status', 'closed' );
         update_option( 'default_pingback_flag', 0 );
 
-        update_option( 'comment_registration', 0 );
+        update_option( 'default_comment_status', 'open' );
+
         update_option( 'require_name_email', 1 );
+        update_option( 'comment_registration', 0 );
+
+        update_option( 'close_comments_for_old_posts', 1 );
+        update_option( 'close_comments_days_old', 30 );
+
+        update_option( 'show_comments_cookies_opt_in', 0 );
 
         update_option( 'thread_comments', 1 );
         update_option( 'thread_comments_depth', 3 );
 
         update_option( 'page_comments', 0 );
 
+        update_option( 'comments_notify', 0 );
+        update_option( 'moderation_notify', 1 );
+
         update_option( 'comment_moderation', 1 );
         update_option( 'comment_whitelist', 0 );
 
         update_option( 'show_avatars', 0 );
+
+        update_option( 'avatar_default', 'blank' );
     }
 
     // delete comments
