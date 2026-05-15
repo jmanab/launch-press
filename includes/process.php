@@ -30,6 +30,19 @@ function lp_get_or_create_page( $title, $slug, $status = 'draft', $menu_order = 
 }
 
 
+
+
+function lp_is_localhost() {
+
+    $server_ip = $_SERVER['SERVER_ADDR'] ?? '';
+
+    return (
+        $server_ip === '127.0.0.1' ||
+        $server_ip === '::1'
+    );
+}
+
+
 function lp_process_settings() {
 
     if ( ! isset( $_POST['lp_run'] ) ) {
@@ -77,18 +90,12 @@ function lp_process_settings() {
     update_option( 'permalink_structure', '/%postname%/' );
 
     // localhost indexing block
-    $host = $_SERVER['HTTP_HOST'] ?? '';
-
-    if (
-        strpos( $host, 'localhost' ) !== false ||
-        strpos( $host, '127.0.0.1' ) !== false ||
-        strpos( $host, '.local' ) !== false ||
-        strpos( $host, '.test' ) !== false ||
-        preg_match('/^(192\.168\.|10\.|172\.)/', $host)
-    ) {
+       
+    if ( lp_is_localhost() ) {
         update_option( 'blog_public', 0 );
+    }else {
+        update_option( 'blog_public', 1 );
     }
-
 
 
     // delete default content
@@ -116,40 +123,11 @@ function lp_process_settings() {
 
 
 
-// localhost detect
-$host = strtolower( $_SERVER['HTTP_HOST'] ?? '' );
-$server = strtolower( $_SERVER['SERVER_NAME'] ?? '' );
 
-$local_detected = false;
 
-$local_keywords = [
-    'localhost',
-    '127.0.0.1',
-    '.local',
-    '.test',
-    '.dev'
-];
+$page_status = lp_is_localhost() ? 'publish' : 'draft';
 
-foreach ( $local_keywords as $keyword ) {
-
-    if (
-        strpos( $host, $keyword ) !== false ||
-        strpos( $server, $keyword ) !== false
-    ) {
-        $local_detected = true;
-    }
-}
-
-if (
-    preg_match('/^(192\\.168\\.|10\\.|172\\.)/', $host) ||
-    preg_match('/^(192\\.168\\.|10\\.|172\\.)/', $server)
-) {
-    $local_detected = true;
-}
-
-$page_status = $local_detected ? 'publish' : 'draft';
-
-// utility pages
+    // utility pages
 lp_get_or_create_page( 'About', 'about', $page_status, 90 );
 lp_get_or_create_page( 'Contact', 'contact', $page_status, 91 );
 lp_get_or_create_page( 'Privacy Policy', 'privacy-policy', $page_status, 92 );

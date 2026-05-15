@@ -10,9 +10,9 @@ function lp_admin_page() {
         $site_title = 'My Website';
     }
 
-    if ( empty( $nickname ) ) {
-        $nickname = ! empty( $site_title ) ? $site_title : 'Website Team';
-    }
+if ( empty( $nickname ) || strtolower( $nickname ) === strtolower( wp_get_current_user()->user_login ) ) {
+    $nickname = ! empty( $site_title ) ? $site_title : 'Website Team';
+}
 
 ?>
 <div class="wrap lp-wrap">
@@ -81,8 +81,8 @@ function lp_admin_page() {
 
                             <select name="lp_site_type">
                                 <option value="website">Website</option>
-                                <option value="website_blog" selected>Website + Blog</option>
-                                <option value="blog_only">Blog Only</option>
+                                <option value="website_blog">Website + Blog</option>
+                                <option value="blog_only" selected>Blog Only</option>
                             </select>
                         </div>
 
@@ -90,8 +90,8 @@ function lp_admin_page() {
                             <label>Comments</label>
 
                             <select name="lp_comments">
-                                <option value="yes" selected>Enabled</option>
-                                <option value="no">Disabled</option>
+                                <option value="yes">Enabled</option>
+                                <option value="no" selected>Disabled</option>
                             </select>
                         </div>
 
