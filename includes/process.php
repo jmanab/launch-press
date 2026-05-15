@@ -3,6 +3,27 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 add_action( 'admin_init', 'lp_process_settings' );
 
+
+
+function lp_get_or_create_page( $title, $slug, $status = 'draft', $menu_order = 0 ) {
+
+    $existing = get_page_by_path( $slug );
+
+    if ( $existing ) {
+        return $existing->ID;
+    }
+
+    return wp_insert_post([
+        'post_title'   => $title,
+        'post_name'    => $slug,
+        'post_content' => 'Content to be updated.',
+        'post_status'  => $status,
+        'post_type'    => 'page',
+        'menu_order'   => $menu_order
+    ]);
+}
+
+
 function lp_process_settings() {
 
     if ( ! isset( $_POST['lp_run'] ) ) {
@@ -87,8 +108,84 @@ function lp_process_settings() {
         ]);
     }
 
+
+
+// localhost detect
+$host = strtolower( $_SERVER['HTTP_HOST'] ?? '' );
+$server = strtolower( $_SERVER['SERVER_NAME'] ?? '' );
+
+$local_detected = false;
+
+$local_keywords = [
+    'localhost',
+    '127.0.0.1',
+    '.local',
+    '.test',
+    '.dev'
+];
+
+foreach ( $local_keywords as $keyword ) {
+
+    if (
+        strpos( $host, $keyword ) !== false ||
+        strpos( $server, $keyword ) !== false
+    ) {
+        $local_detected = true;
+    }
+}
+
+if (
+    preg_match('/^(192\\.168\\.|10\\.|172\\.)/', $host) ||
+    preg_match('/^(192\\.168\\.|10\\.|172\\.)/', $server)
+) {
+    $local_detected = true;
+}
+
+$page_status = $local_detected ? 'publish' : 'draft';
+
+// utility pages
+lp_get_or_create_page( 'About', 'about', $page_status, 90 );
+lp_get_or_create_page( 'Contact', 'contact', $page_status, 91 );
+lp_get_or_create_page( 'Privacy Policy', 'privacy-policy', $page_status, 92 );
+lp_get_or_create_page( 'Disclaimer', 'disclaimer', $page_status, 93 );
+
+// site nature
+$site_type = sanitize_text_field( $_POST['lp_site_type'] ?? 'website_blog' );
+
+if ( $site_type === 'website' ) {
+
+    $home_id = lp_get_or_create_page( 'Home', 'home', $page_status, 0 );
+
+    update_option( 'show_on_front', 'page' );
+    update_option( 'page_on_front', $home_id );
+    update_option( 'page_for_posts', 0 );
+
+}
+
+elseif ( $site_type === 'website_blog' ) {
+
+    $home_id = lp_get_or_create_page( 'Home', 'home', $page_status, 0 );
+
+    $blog_id = lp_get_or_create_page( 'Blog', 'blog', $page_status, 1 );
+
+    update_option( 'show_on_front', 'page' );
+    update_option( 'page_on_front', $home_id );
+    update_option( 'page_for_posts', $blog_id );
+
+}
+
+else {
+
+    lp_get_or_create_page( 'Blog', 'blog', $page_status, 1 );
+
+    update_option( 'show_on_front', 'posts' );
+    update_option( 'page_for_posts', 0 );
+    update_option( 'page_on_front', 0 );
+}
+
+
     // discussion settings
-    $comments_enabled = isset( $_POST['lp_comments'] );
+    $comments_enabled = ( $_POST['lp_comments'] ?? 'yes' ) === 'yes';
 
     if ( ! $comments_enabled ) {
 
