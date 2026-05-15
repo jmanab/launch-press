@@ -10,6 +10,12 @@ function lp_get_or_create_page( $title, $slug, $status = 'draft', $menu_order = 
     $existing = get_page_by_path( $slug );
 
     if ( $existing ) {
+
+        wp_update_post([
+            'ID'         => $existing->ID,
+            'menu_order' => $menu_order
+        ]);
+
         return $existing->ID;
     }
 
@@ -284,6 +290,12 @@ else {
         }
     }
 
+
+
+// username exposure protection
+update_option( 'require_name_email', 1 );
+
+
     flush_rewrite_rules();
 
     deactivate_plugins( plugin_basename( dirname( __DIR__ ) . '/launch-press.php' ) );
@@ -291,3 +303,25 @@ else {
     wp_safe_redirect( admin_url( 'plugins.php' ) );
     exit;
 }
+
+
+add_action( 'template_redirect', function() {
+
+    if ( is_author() ) {
+        wp_redirect( home_url(), 301 );
+        exit;
+    }
+});
+
+add_filter( 'rest_endpoints', function( $endpoints ) {
+
+    if ( isset( $endpoints['/wp/v2/users'] ) ) {
+        unset( $endpoints['/wp/v2/users'] );
+    }
+
+    if ( isset( $endpoints['/wp/v2/users/(?P<id>[\\d]+)'] ) ) {
+        unset( $endpoints['/wp/v2/users/(?P<id>[\\d]+)'] );
+    }
+
+    return $endpoints;
+});

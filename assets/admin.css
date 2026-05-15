@@ -177,3 +177,12 @@
         flex-direction:column;
     }
 }
+
+
+.lp-consent{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    margin:18px 0;
+    line-height:1.6;
+}

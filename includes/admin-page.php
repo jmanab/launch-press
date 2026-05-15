@@ -11,7 +11,7 @@ function lp_admin_page() {
     }
 
     if ( empty( $nickname ) ) {
-        $nickname = 'Editorial Team';
+        $nickname = ! empty( $site_title ) ? $site_title : 'Website Team';
     }
 
 ?>
@@ -202,6 +202,11 @@ function lp_admin_page() {
                     <p>
                         Launch Press will now apply all selected baseline optimizations and automatically deactivate itself after completion.
                     </p>
+
+                    <label class="lp-consent">
+                        <input type="checkbox" name="lp_confirm" required>
+                        I understand Launch Press will modify settings and remove default content.
+                    </label>
 
                     <button type="submit" name="lp_run" class="lp-btn">
                         Apply Settings
