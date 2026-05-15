@@ -157,14 +157,14 @@ If you use Launch Press in your workflow and want to contribute:
 
 # ☕ Support
 
-If Launch Press saves you development time, consider supporting the project and its future development.
+If Launch Press saves you development time, consider [supporting](https://chai.technotizia.com) the project and its future development.
 
-Your support helps continue development of:
+Your [support](https://chai.technotizia.com) helps continue development of:
 
 * WordPress plugins
 * Developer tools
 * Open-source utilities
-* Workflow automation systems
+* Workflow automation systems 
 
 ---
 
@@ -178,3 +178,4 @@ GPL v2 or later
 
 **Manab**
 Web Developer & WordPress Workflow Builder
+[Technotizia](https://technotizia.com)
