@@ -3,18 +3,7 @@
 }
 
 .lp-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
     margin-bottom:20px;
-}
-
-.lp-note{
-    background:#eef4ff;
-    border:1px solid #d8e3ff;
-    padding:15px;
-    border-radius:10px;
-    max-width:360px;
 }
 
 .lp-grid{
@@ -53,11 +42,8 @@
     height:fit-content;
 }
 
-.lp-card ul{
-    margin-left:18px;
-}
-
 @media(max-width:1000px){
+
     .lp-grid{
         grid-template-columns:1fr;
     }

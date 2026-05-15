@@ -20,19 +20,18 @@ function lp_process_settings() {
         return;
     }
 
-    update_option( 'blogname', sanitize_text_field( $_POST['lp_site_title'] ) );
+    $site_title = sanitize_text_field( $_POST['lp_site_title'] ?? '' );
+    $nickname   = sanitize_text_field( $_POST['lp_nickname'] ?? '' );
+
+    update_option( 'blogname', $site_title );
 
     $user_id = get_current_user_id();
 
-    update_user_meta(
-        $user_id,
-        'nickname',
-        sanitize_text_field( $_POST['lp_nickname'] )
-    );
+    update_user_meta( $user_id, 'nickname', $nickname );
 
     wp_update_user([
         'ID'           => $user_id,
-        'display_name' => sanitize_text_field( $_POST['lp_nickname'] )
+        'display_name' => $nickname
     ]);
 
     update_option( 'users_can_register', 0 );
@@ -48,8 +47,53 @@ function lp_process_settings() {
     update_option( 'large_size_w', 0 );
     update_option( 'large_size_h', 0 );
 
-    global $wpdb;
+    update_option( 'permalink_structure', '/%postname%/' );
 
+    // localhost indexing block
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+
+    if (
+        strpos( $host, 'localhost' ) !== false ||
+        strpos( $host, '127.0.0.1' ) !== false ||
+        strpos( $host, '.local' ) !== false ||
+        strpos( $host, '.test' ) !== false ||
+        preg_match('/^(192\.168\.|10\.|172\.)/', $host)
+    ) {
+        update_option( 'blog_public', 0 );
+    }
+
+    // discussion settings
+    $comments_enabled = isset( $_POST['lp_comments'] );
+
+    if ( ! $comments_enabled ) {
+
+        update_option( 'default_comment_status', 'closed' );
+        update_option( 'comment_registration', 0 );
+        update_option( 'thread_comments', 0 );
+        update_option( 'show_avatars', 0 );
+
+    } else {
+
+        update_option( 'default_comment_status', 'open' );
+
+        update_option( 'default_ping_status', 'closed' );
+        update_option( 'default_pingback_flag', 0 );
+
+        update_option( 'comment_registration', 0 );
+        update_option( 'require_name_email', 1 );
+
+        update_option( 'thread_comments', 1 );
+        update_option( 'thread_comments_depth', 3 );
+
+        update_option( 'page_comments', 0 );
+
+        update_option( 'comment_moderation', 1 );
+        update_option( 'comment_whitelist', 0 );
+
+        update_option( 'show_avatars', 0 );
+    }
+
+    // delete comments
     $comments = get_comments([
         'status' => 'all',
         'number' => 0
@@ -59,6 +103,7 @@ function lp_process_settings() {
         wp_delete_comment( $comment->comment_ID, true );
     }
 
+    // theme sanitize
     require_once ABSPATH . 'wp-admin/includes/theme.php';
 
     $themes       = wp_get_themes();
@@ -90,9 +135,6 @@ function lp_process_settings() {
 
     deactivate_plugins( plugin_basename( dirname( __DIR__ ) . '/launch-press.php' ) );
 
-    wp_safe_redirect(
-        admin_url( 'plugins.php?deactivate=true' )
-    );
-
+    wp_safe_redirect( admin_url( 'plugins.php' ) );
     exit;
 }
